@@ -32,6 +32,6 @@ private:
   std::vector< std::vector< std::pair< long, TCost > > > adj;
 };
 
-#include "Graph.cxx"   // implementación de los métodos plantilla
+#include "Grafo.cxx"   // implementación de los métodos plantilla
 
 #endif
