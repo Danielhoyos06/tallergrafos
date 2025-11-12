@@ -23,7 +23,7 @@ struct Point
 // -------------------------------------------------------------------------
 
 // TODO 1: typedef Graph< Point, float > TGraph
-typedef Graph< Point, float > TGraph;
+typedef Grafo< Point, float > TGraph;
 
 // -------------------------------------------------------------------------
 int main( int argc, char* argv[] )
