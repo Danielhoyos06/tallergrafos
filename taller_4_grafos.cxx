@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "Grafo.h"
+
 
 // -------------------------------------------------------------------------
 struct Point
@@ -20,7 +22,8 @@ struct Point
 
 // -------------------------------------------------------------------------
 
-// TODO 1: typedef Graph< Point, float > TGraph 
+// TODO 1: typedef Graph< Point, float > TGraph
+typedef Graph< Point, float > TGraph;
 
 // -------------------------------------------------------------------------
 int main( int argc, char* argv[] )
