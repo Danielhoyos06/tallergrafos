@@ -6,109 +6,119 @@
 #include <sstream>
 #include "Grafo.h"
 
-
 // -------------------------------------------------------------------------
+// Estructura que representa un punto 3D
 struct Point
 {
   float X, Y, Z;
-  float distanceTo( const Point& b ) const
-    {
-      float x = X - b.X;
-      float y = Y - b.Y;
-      float z = Z - b.Z;
-      return( std::sqrt( ( x * x ) + ( y * y ) + ( z * z ) ) );
-    }
+
+  float distanceTo(const Point& b) const
+  {
+    float x = X - b.X;
+    float y = Y - b.Y;
+    float z = Z - b.Z;
+    return std::sqrt((x * x) + (y * y) + (z * z));
+  }
 };
 
 // -------------------------------------------------------------------------
-
-// TODO 1: typedef Graph< Point, float > TGraph
-typedef Grafo< Point, float > TGraph;
+// TODO 1: Definir el tipo de dato del grafo
+typedef Grafo<Point, float> TGrafo;
 
 // -------------------------------------------------------------------------
-int main( int argc, char* argv[] )
+int main(int argc, char* argv[])
 {
-  if( argc < 4 )
+  if (argc < 4)
   {
-    std::cerr
-      << "Usage: " << argv[ 0 ] << " input_mesh start end"
-      << std::endl;
-    return( 1 );
+    std::cerr << "Uso: " << argv[0] << " archivo_malla punto_inicio punto_fin" << std::endl;
+    return 1;
+  }
 
-  } // fi
-  long start_id = std::atoi( argv[ 2 ] );
-  long end_id = std::atoi( argv[ 3 ] );
+  long inicio_id = std::atoi(argv[2]);
+  long fin_id = std::atoi(argv[3]);
 
-  // TODO 2: TGraph g;
+  // TODO 2: Declarar variable de tipo grafo
+  TGrafo g;
 
-  // Load file in a buffer
-  std::ifstream in_mesh_stream( argv[ 1 ], std::ifstream::binary );
-  if( !in_mesh_stream )
+  // -----------------------------------------------------------------------
+  // Cargar el archivo de malla
+  std::ifstream in_mesh_stream(argv[1], std::ifstream::binary);
+  if (!in_mesh_stream)
   {
-    std::cerr << "Error reading \"" << argv[ 1 ] << "\"" << std::endl;
-    return( 1 );
+    std::cerr << "Error al leer el archivo \"" << argv[1] << "\"" << std::endl;
+    return 1;
+  }
 
-  } // fi
-  in_mesh_stream.seekg( 0, in_mesh_stream.end );
-  unsigned long in_mesh_file_length = in_mesh_stream.tellg( );
-  in_mesh_stream.seekg( 0, in_mesh_stream.beg );
-  char* in_mesh_file_buffer = new char[ in_mesh_file_length ];
-  in_mesh_stream.read( in_mesh_file_buffer, in_mesh_file_length );
-  in_mesh_stream.close( );
-  std::istringstream in_mesh( in_mesh_file_buffer );
+  in_mesh_stream.seekg(0, in_mesh_stream.end);
+  unsigned long file_length = in_mesh_stream.tellg();
+  in_mesh_stream.seekg(0, in_mesh_stream.beg);
+  char* buffer = new char[file_length];
+  in_mesh_stream.read(buffer, file_length);
+  in_mesh_stream.close();
+  std::istringstream in_mesh(buffer);
 
-  // Read vertices
-  long nPoints;
-  in_mesh >> nPoints;
-  for( long pId = 0; pId < nPoints; pId++ )
+  // -----------------------------------------------------------------------
+  // Lectura de vértices (puntos 3D)
+  long nPuntos;
+  in_mesh >> nPuntos;
+
+  for (long i = 0; i < nPuntos; i++)
   {
-    Point pnt;
-    in_mesh >> pnt.X >> pnt.Y >> pnt.Z;
+    Point p;
+    in_mesh >> p.X >> p.Y >> p.Z;
 
-    // TODO 3: g.AddVertex( pnt );
+    // TODO 3: Agregar cada punto como vértice del grafo
+    g.AddVertex(p);
+  }
 
-  } // rof
+  // -----------------------------------------------------------------------
+  // Lectura de aristas
+  long nAristas;
+  in_mesh >> nAristas;
 
-  // Read edges
-  long nEdges;
-  in_mesh >> nEdges;
-  for( long eId = 0; eId < nEdges; eId++ )
+  for (long eId = 0; eId < nAristas; eId++)
   {
-    long start, end;
-    in_mesh >> start >> end;
+    long inicio, fin;
+    in_mesh >> inicio >> fin;
 
-    /*
-      TODO 4:
-      cost = g.GetVertex( start ).distanceTo( g.GetVertex( end ) );
-      g.AddEdge( start, end, cost );
-      g.AddEdge( end, start, cost );
-    */
+    // TODO 4: Calcular costo (distancia euclidiana) y agregar arista
+    float costo = g.GetVertex(inicio).distanceTo(g.GetVertex(fin));
+    g.AddEdge(inicio, fin, costo);
+    g.AddEdge(fin, inicio, costo); // Grafo no dirigido
+  }
 
-  } // rof
-  delete [] in_mesh_file_buffer;
+  delete[] buffer;
 
-  if(
-    start_id < 0 || start_id >= vertices.size( ) ||
-    end_id < 0 || end_id >= vertices.size( )
-    )
+  // -----------------------------------------------------------------------
+  // Verificar índices válidos
+  if (
+    inicio_id < 0 || inicio_id >= g.VertexCount() ||
+    fin_id < 0 || fin_id >= g.VertexCount()
+  )
   {
-    std::cerr << "Invalid path endpoints." << std::endl;
-    return( 1 );
+    std::cerr << "Puntos de inicio o fin inválidos." << std::endl;
+    return 1;
+  }
 
-  } // fi
+  // -----------------------------------------------------------------------
+  // TODO 5: Encontrar la ruta de costo mínimo e imprimir coordenadas
+  std::vector<long> ruta = g.Dijkstra(inicio_id, fin_id);
 
-  /*
-    TODO 5:
-    std::vector< long > path = g.Dijkstra( start_id, end_id );
-    std::cout << path.size( ) << std::endl;
-    for( unsigned int i = 0; i < path.size( ); ++i )
-    std::cout
-    << vertices[ path[ i ] ].X << " "
-    << vertices[ path[ i ] ].Y << " "
-    << vertices[ path[ i ] ].Z << std::endl;
-  */
+  if (ruta.empty())
+  {
+    std::cerr << "No existe un camino entre los puntos dados." << std::endl;
+    return 1;
+  }
 
-  return( 0 );
+  std::cout << ruta.size() << std::endl;
+
+  for (unsigned int i = 0; i < ruta.size(); ++i)
+  {
+    const Point& p = g.GetVertex(ruta[i]);
+    std::cout << p.X << " " << p.Y << " " << p.Z << std::endl;
+  }
+
+  return 0;
 }
 
 // eof -
